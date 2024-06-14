@@ -1,82 +1,98 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login  | Sistem Informasi Stock Kesehatan Kopassus</title>
-
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="dist/css/sanspro.css">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
-  <!-- icheck bootstrap -->
-  <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMALKES Login</title>
   <style>
-    .image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-body {
-    background-image: url("dist/images/background.jpeg");
-    background-size: cover;
-  }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #00b3b3;
+      background: linear-gradient(45deg, #00b3b3 25%, #00e6e6 75%);
+      font-family: Arial, sans-serif;
+    }
+
+    .login-container {
+      background: #e0f7f7;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 300px;
+    }
+
+    .login-container img {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    .login-container h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #006666;
+    }
+
+    .login-container p {
+      margin: 5px 0 20px;
+      color: #006666;
+    }
+
+    .login-container .input-group {
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .login-container .input-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .login-container .btn {
+      width: 100%;
+      padding: 10px;
+      background: #007373;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .login-container .btn:hover {
+      background: #005959;
+    }
+
+    .login-container .btn-warning {
+      background: #ffaa00;
+      color: #fff;
+    }
+
+    .login-container .btn-warning:hover {
+      background: #cc8800;
+    }
   </style>
 </head>
-<body class="hold-transition login-page">
-<div class="login-box">
-<div class="image-container">
-<img src="dist/images/logo.png" width="200px" alt="" >
-</div>
-  <div class="card card-outline card-primary">
-    <div class="card-header text-center">
-      <a href="index2.html" class="h1"><b>Sistem Informasi  </b>Stock Kesehatan Kopassus</a>
-    </div>
-    <div class="card-body">
-      <p class="login-box-msg">Sign in to start your session</p>
-      <!-- Tambahkan Alert Error Login -->
-
-      <form action="db/proses-login.php" method="POST">
-        <div class="input-group mb-3">
-          <input type="text" class="form-control" placeholder="Username" name="username">
-          <div class="input-group-append">
-            <div class="input-group-text">
-              <span class="fas fa-user"></span>
-            </div>
-          </div>
-        </div>
-        <div class="input-group mb-3">
-          <input type="password" class="form-control" placeholder="Password" name="password">>
-          <div class="input-group-append">
-            <div class="input-group-text">
-              <span class="fas fa-lock"></span>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <!-- /.col -->
-          <div class="col-12">
-            <button type="submit" class="btn btn-primary btn-block">Login</button>
-            <a href="register.php" class="btn btn-warning btn-block">Belum Punya Akun?</a>
-          </div>
-          <!-- /.col -->
-        </div>
-      </form>
-    </div>
-    <!-- /.card-body -->
+<body>
+  <div class="login-container">
+    <img src="dist/images/logo.png" alt="Logo">
+    <h1>SIMALKES</h1>
+    <p>Sistem Aplikasi Manajemen Alkes</p>
+    <form action="db/proses-login.php" method="POST">
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Username" name="username">
+      </div>
+      <div class="input-group mb-3">
+        <input type="password" class="form-control" placeholder="Password" name="password">
+      </div>
+      <button type="submit" class="btn">Login</button>
+    </form>
   </div>
-  <!-- /.card -->
-</div>
-<!-- /.login-box -->
-
-<!-- jQuery -->
-<script src="plugins/jquery/jquery.min.js"></script>
-<!-- Bootstrap 4 -->
-<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<!-- AdminLTE App -->
-<script src="dist/js/adminlte.min.js"></script>
 </body>
 </html>

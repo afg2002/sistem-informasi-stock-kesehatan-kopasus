@@ -4,18 +4,110 @@ require 'koneksi.php';
 
 global $conn;
 
-// Ubah fungsi getAlkesData untuk mengembalikan data dalam format JSON
 function getAlkesData()
 {
     global $conn;
-    $sql = "SELECT * FROM Alkes";
+    $sql = "SELECT alkes.*, kategori_alkes.nama_kategori, kondisi.nama_kondisi
+            FROM alkes
+            INNER JOIN kategori_alkes ON alkes.kategori_id = kategori_alkes.id
+            INNER JOIN kondisi ON alkes.kondisi_id = kondisi.id";
     $result = $conn->query($sql);
     $data = array();
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $data[] = $row;
+        }
+    }
+    return $data;
+}
+
+
+// Function to get category names from the database
+function getNamaKategoriAlkes()
+{
+    global $conn;
+
+    $sql = "SELECT id, nama_kategori FROM kategori_alkes";
+    $result = $conn->query($sql);
+
+    $kategoriNames = array();
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $kategoriNames[$row['id']] = $row['nama_kategori'];
+        }
+    }
+
+    return $kategoriNames;
+}
+
+function getNamaKondisi() {
+    global $conn;
+    $sql = "SELECT * FROM kondisi";
+    $result = mysqli_query($conn, $sql);
+
+    $kondisi = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $kondisi[] = $row;
+    }
+    return $kondisi;
+}
+
+
+
+function getDataAlkesByNamaKategori($namaKategori)
+{
+    global $conn;
+    // Menghindari SQL Injection dengan menggunakan parameterized query
+    $sql = "SELECT alkes.*, kategori_alkes.nama_kategori, kondisi.*
+            FROM alkes
+            INNER JOIN kategori_alkes ON alkes.kategori_id = kategori_alkes.id
+            INNER JOIN kondisi ON alkes.kondisi_id = kondisi.id
+            WHERE kategori_alkes.nama_kategori = ?";
+    
+    // Persiapkan statement SQL
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $namaKategori); // Mengikat parameter untuk menghindari SQL Injection
+    $stmt->execute();
+    
+    $result = $stmt->get_result();
+    $data = array();
+    
+    // Ambil data dari hasil query
     while ($row = $result->fetch_assoc()) {
         $data[] = $row;
     }
-    return $result;
+    
+    return $data;
 }
+
+function getDataAlkesByNamaKondisi($kondisi)
+{
+    global $conn;
+    // Menghindari SQL Injection dengan menggunakan parameterized query
+    $sql = "SELECT alkes.*, kategori_alkes.nama_kategori, kondisi.*
+            FROM alkes
+            INNER JOIN kategori_alkes ON alkes.kategori_id = kategori_alkes.id
+            INNER JOIN kondisi ON alkes.kondisi_id = kondisi.id
+            WHERE kondisi.nama_kondisi = ?";
+    
+    // Persiapkan statement SQL
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $kondisi); // Mengikat parameter untuk menghindari SQL Injection
+    $stmt->execute();
+    
+    $result = $stmt->get_result();
+    $data = array();
+    
+    // Ambil data dari hasil query
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
+    
+    return $data;
+}
+
+
+
 
 
 // Fungsi untuk mendapatkan data Alkes berdasarkan ID dari database
@@ -27,14 +119,15 @@ function getAlkesById($id)
     return $result->fetch_assoc();
 }
 
-function addAlkes($tanggal, $namaAlkes, $jumlah, $jenis, $keterangan) {
+function addAlkes($namaMateril, $merk_type, $satuan, $kondisi_id, $keterangan, $kategoriId)
+{
     global $conn;
-    $sql = "INSERT INTO Alkes (tanggal, nama_alkes, jumlah, jenis, keterangan) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO alkes (nama_materil, merk_type, satuan, kondisi_id, keterangan, kategori_id)
+            VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssiss", $tanggal, $namaAlkes, $jumlah, $jenis, $keterangan);
-    $result = $stmt->execute();
+    $stmt->bind_param("sssiss", $namaMateril, $merk_type, $satuan, $kondisi_id, $keterangan, $kategoriId);
+    $result =  $stmt->execute();
     $stmt->close();
-
     if ($result) {
         $_SESSION['flash_message'] = [
             'type' => 'success',
@@ -46,16 +139,17 @@ function addAlkes($tanggal, $namaAlkes, $jumlah, $jenis, $keterangan) {
             'message' => "Gagal menambahkan data Alkes. Silakan coba lagi."
         ];
     }
-
-    return $result;
 }
 
-function updateAlkesData($id, $tanggal, $namaAlkes, $jumlah, $jenis, $keterangan) {
+
+function updateAlkesData($id, $namaMateri, $merkType, $satuan, $kondisi,$keterangan, $kategoriId) {
     global $conn;
-    $sql = "UPDATE alkes SET tanggal=?, nama_alkes=?, jumlah=?, jenis=?, keterangan=? WHERE id=?";
+    $sql = "UPDATE alkes
+            SET nama_materil = ?, merk_type = ?, satuan = ?, kondisi_id = ?, keterangan = ?, kategori_id = ?
+            WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssissi", $tanggal, $namaAlkes, $jumlah, $jenis, $keterangan, $id);
-    $result = $stmt->execute();
+    $stmt->bind_param("sssiisi", $namaMateril, $merk_type, $satuan, $kondisi_id, $keterangan, $kategoriId, $id);
+    $result =  $stmt->execute();
     $stmt->close();
 
     if ($result) {
@@ -308,6 +402,21 @@ function getKategoriObatData() {
 
     return $kategoriObatData;
 }
+
+
+function getKategoriAlkesData() {
+    global $conn;
+    $sql = "SELECT * FROM kategori_alkes";
+    $result = mysqli_query($conn, $sql);
+
+    $kategoriAlkesData = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $kategoriAlkesData[] = $row;
+    }
+    return $kategoriAlkesData;
+}
+    
+
 // Fungsi untuk mendapatkan data penerimaan obat beserta nama obat
 function getPenerimaanObatDataAnalgetik()
 {
