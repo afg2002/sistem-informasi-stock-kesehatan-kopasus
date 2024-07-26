@@ -3,6 +3,9 @@ ob_start();
 
 require_once 'template/header.php';
 
+
+
+// Add User
 if (isset($_GET['action']) && $_GET['action'] == 'addUser') {
     if (
         isset($_POST['username']) &&
@@ -14,6 +17,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'addUser') {
         $password = $_POST['password'];
         $full_name = $_POST['full_name'];
         $role = $_POST['role'];
+        
         $result = addUser($username, $password, $role, $full_name);
         if ($result) {
             $_SESSION['flash_message'] = [
@@ -23,7 +27,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'addUser') {
         } else {
             $_SESSION['flash_message'] = [
                 'type' => 'danger',
-                'message' => 'Failed to add user. Please check the input data.'
+                'message' => 'Failed to add user. Username might already exist or there was an error with the input data.'
             ];
         }
         header("Location: users.php");
@@ -32,6 +36,40 @@ if (isset($_GET['action']) && $_GET['action'] == 'addUser') {
         $_SESSION['flash_message'] = [
             'type' => 'danger',
             'message' => 'Failed to add user. Invalid input data.'
+        ];
+        header("Location: users.php");
+        exit();
+    }
+}
+
+// Update User
+if (isset($_GET['action']) && $_GET['action'] == 'updateUser') {
+    if(isset($_POST['edit_user_id'])) {
+        $id = $_POST['edit_user_id'];
+        $username = $_POST['edit_username'];
+        $password = $_POST['edit_password'];
+        $role = $_POST['edit_role'];
+        $full_name = $_POST['edit_full_name'];
+
+        $result = updateUser($id, $username, $password, $role, $full_name);
+        if ($result) {
+            $_SESSION['flash_message'] = [
+                'type' => 'success',
+                'message' => 'User updated successfully.'
+            ];
+        } else {
+            $_SESSION['flash_message'] = [
+                'type' => 'danger',
+                'message' => 'Failed to update user. Username might already exist or there was an error with the input data.'
+            ];
+        }
+        
+        header("Location: users.php");
+        exit();
+    } else {
+        $_SESSION['flash_message'] = [
+            'type' => 'danger',
+            'message' => 'Failed to update user. Invalid input data.'
         ];
         header("Location: users.php");
         exit();
@@ -66,53 +104,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'deleteUser') {
     }
 }
 
-
-// Update User
-if (isset($_GET['action']) && $_GET['action'] == 'updateUser') {
-    if(isset($_POST['edit_user_id'])) {
-        $id = $_POST['edit_user_id'];
-        $username = $_POST['edit_username'];
-        $password = $_POST['edit_password'];
-        $role = $_POST['edit_role'];
-        $full_name = $_POST['edit_full_name'];
-
-        // Logging statements for debugging
-        error_log("Updating user with ID: " . $id);
-        error_log("Username: " . $username);
-        error_log("Password: " . $password);
-        error_log("Role: " . $role);
-        error_log("Full Name: " . $full_name);
-
-        // Perform the user update operation
-        $result = updateUser($id, $username, $password, $role, $full_name);
-
-        if ($result) {
-            $_SESSION['flash_message'] = [
-                'type' => 'success',
-                'message' => 'User updated successfully.'
-            ];
-        } else {
-            $_SESSION['flash_message'] = [
-                'type' => 'danger',
-                'message' => 'Failed to update user. Please check the input data. Error: ' . mysqli_error($conn)
-            ];
-
-        }
-        
-
-        header("Location: users.php?success=1");
-        exit();
-    } else {
-        // Error handling
-        $_SESSION['flash_message'] = [
-            'type' => 'danger',
-            'message' => 'Failed to update user. Invalid input data.'
-        ];
-
-        header("Location: users.php?success=0");
-        exit();
-    }
-}
 
 
 $getUser = getUserData();
