@@ -582,13 +582,6 @@ function getUserData() {
     return $result;
 }
 
-function addUser($username, $password, $role, $full_name) {
-    global $conn;
-    $sql = "INSERT INTO user (username, password,role, full_name) VALUES ('$username', '$password', '$role', '$full_name')";
-    $result = $conn->query($sql);
-
-    return $result;
-}
 
 function deleteUser($id) {
     global $conn;
@@ -598,21 +591,63 @@ function deleteUser($id) {
     return $result;
 }
 
-//Update User
-function updateUser($id, $username, $password, $role, $full_name) {
+// Add this new function to check if username exists
+function isUsernameExists($username, $excludeUserId = null)
+{
     global $conn;
+    $sql = "SELECT id FROM users WHERE username = ?";
+    $params = [$username];
     
-    // Cek apakah password dikosongkan
-    if (empty($password)) {
-        $sql = "UPDATE user SET username='$username', role='$role', full_name='$full_name' WHERE id='$id'";
-    } else {
-        // Jika password tidak kosong, termasuk pembaruan password
-        $sql = "UPDATE user SET username='$username', password='$password', role='$role', full_name='$full_name' WHERE id='$id'";
+    if ($excludeUserId !== null) {
+        $sql .= " AND id != ?";
+        $params[] = $excludeUserId;
     }
     
-    $result = $conn->query($sql);
-
-    return $result;
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    return $result->num_rows > 0;
 }
 
+// Modify the addUser function
+function addUser($username, $password, $role, $full_name)
+{
+    global $conn;
+    
+    // Check if username already exists
+    if (isUsernameExists($username)) {
+        return false; // Username already exists
+    }
+    
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $sql = "INSERT INTO users (username, password, role, full_name) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssss", $username, $hashedPassword, $role, $full_name);
+    return $stmt->execute();
+}
+
+// Modify the updateUser function
+function updateUser($id, $username, $password, $role, $full_name)
+{
+    global $conn;
+    
+    // Check if username already exists (excluding the current user)
+    if (isUsernameExists($username, $id)) {
+        return false; // Username already exists
+    }
+    
+    if (!empty($password)) {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $sql = "UPDATE users SET username = ?, password = ?, role = ?, full_name = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssssi", $username, $hashedPassword, $role, $full_name, $id);
+    } else {
+        $sql = "UPDATE users SET username = ?, role = ?, full_name = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sssi", $username, $role, $full_name, $id);
+    }
+    return $stmt->execute();
+}
 
